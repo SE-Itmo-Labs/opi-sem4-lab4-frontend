@@ -9,7 +9,6 @@ import {SnCoordinatesCanvases} from "../../sections/SnCoordinatesCanvases/SnCoor
 import {SnProfileSettings} from "../../sections/SnProfileSettings/SnProfileSettings.tsx";
 import {useCallback, useEffect, useRef} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {fetchAllPoints} from "../../../redux/slices/pointsSlice.ts";
 import type {RootState} from "../../../redux/store.ts";
 
 import type { AppDispatch } from "../../../redux/store.ts";

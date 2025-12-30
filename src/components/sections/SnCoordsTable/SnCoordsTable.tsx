@@ -12,7 +12,7 @@ export const SnCoordsTable = () => {
     const points = useSelector((state: RootState) => state.points.data);
     const myUsername = useSelector((state: RootState) => state.auth.username);
 
-    const { token, isAuthenticated } = useSelector((state: RootState) => state.auth);
+    const { token } = useSelector((state: RootState) => state.auth);
     const dispatch = useDispatch<AppDispatch>();
 
 
@@ -31,7 +31,8 @@ export const SnCoordsTable = () => {
                         await dispatch(deletePoint({ id: rowData.id, token })).unwrap();
                         dispatch(fetchAllPoints(token)); // или полагаться на WebSocket
                         toast.success("Точка удалена");
-                    } catch (err: any) {
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    } catch (_:unknown) {
                         toast.error("Не удалось удалить точку");
                     }
                 }}
