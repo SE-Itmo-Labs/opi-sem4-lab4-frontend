@@ -4,7 +4,7 @@ import {InputText} from "primereact/inputtext";
 import {Button} from "primereact/button";
 import {login} from "../../redux/slices/authSlice.ts";
 import {useDispatch, useSelector} from "react-redux";
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import toast from "react-hot-toast";
 import type {RootState} from "../../redux/store.ts";
 
@@ -94,7 +94,7 @@ function LoginPage() {
                             placeholder={"Пароль"}
                         />
 
-                        <p className={"mt-2"}>Нет в системе? <a href={"/register"}>Зарегистрироваться</a></p>
+                        <p className={"mt-2"}>Нет в системе? <Link to={"/register"}>Зарегистрироваться</Link></p>
 
                         <Button className={"mt-1"} type={"submit"} label={"Войти уже наконец-то!"} />
 

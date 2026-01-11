@@ -6,7 +6,7 @@ import {Button} from "primereact/button";
 import toast from "react-hot-toast";
 import {login} from "../../redux/slices/authSlice.ts";
 import {useDispatch, useSelector} from "react-redux";
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import type {RootState} from "../../redux/store.ts";
 
 export const RegisterPage = () => {
@@ -120,7 +120,7 @@ export const RegisterPage = () => {
 
                         </div>
 
-                        <p>Уже зарегистрированы? <a href={"/"}>Войти</a></p>
+                        <p>Уже зарегистрированы? <Link to={"/login"}>Войти</Link></p>
 
                         <Button type={"submit"} >Зарегистрироваться!</Button>
                     </form>
