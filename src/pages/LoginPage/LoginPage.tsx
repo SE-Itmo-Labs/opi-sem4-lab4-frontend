@@ -1,17 +1,25 @@
 import Header from "../../components/layout/Header/Header.tsx";
-import {useState, type FormEvent, type ChangeEvent} from "react";
+import {useState, type FormEvent, type ChangeEvent, useEffect} from "react";
 import {InputText} from "primereact/inputtext";
 import {Button} from "primereact/button";
-import classes from "./LoginPage.module.scss";
 import {login} from "../../redux/slices/authSlice.ts";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 import toast from "react-hot-toast";
+import type {RootState} from "../../redux/store.ts";
 
 function LoginPage() {
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
+
+    const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate("/")
+        }
+    })
 
     const [formParams, setFormParams] = useState<{
         login: string;
@@ -47,11 +55,11 @@ function LoginPage() {
                 dispatch(login({username: formParams.login, token: data.token}));
                 navigate('/'); // редирект на main
             } else {
-                toast('Ошибка авторизации: ' + (data.message || 'Неизвестная ошибка'));
+                toast.error('Ошибка авторизации: ' + (data.message || 'Неизвестная ошибка'));
             }
         } catch (err) {
             console.error(err);
-            toast('Сетевая ошибка');
+            toast.error('Сетевая ошибка');
         }
     };
 
@@ -59,30 +67,37 @@ function LoginPage() {
         <>
             <Header />
 
-            <div className="row d-flex justify-content-center align-items-center">
-                <div className="col-6 align-self-center d-flex flex-column align-items-center">
-                    <form 
-                        className={classes.form + " align-self-center d-flex flex-column align-items-center"}
+            <div className="row d-flex justify-content-center align-items-center mt-3">
+                <div className="align-items-center col-sm-6 align-self-center d-flex flex-column">
+                    <form
+                        className="align-self-center d-flex flex-column align-items-center p-2"
                         onSubmit={handleSubmit}
                     >
                         <h2 className=""><b>Войти</b></h2>
 
                         <InputText
-
+                            className="mt-2 w-100"
                         type={"text"}
                         onChange={handleInputChange('login')}
                         value={formParams.login}
                         placeholder={"Логин"}
 
                         />
+
                         <InputText
+
+                            className="mt-2 w-100"
+
                             type={"password"}
                             onChange={handleInputChange('password')}
                             value={formParams.password}
                             placeholder={"Пароль"}
                         />
 
-                        <Button type={"submit"} label={"Войти уже наконец-то!"} />
+                        <p className={"mt-2"}>Нет в системе? <a href={"/register"}>Зарегистрироваться</a></p>
+
+                        <Button className={"mt-1"} type={"submit"} label={"Войти уже наконец-то!"} />
+
                     </form>
                 </div>
             </div>

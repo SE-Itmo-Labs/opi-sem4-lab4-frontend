@@ -2,8 +2,11 @@
   "name": "web-sem3-lab4-frontend",
   "private": true,
   "version": "0.0.0",
+  "homepage": "https://ssnagin.github.io/web-sem3-lab4-frontend/",
   "type": "module",
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "dev": "python project_structure.py && vite",
     "build": "tsc -b && vite build && gh-pages -d dist",
     "lint": "eslint .",
