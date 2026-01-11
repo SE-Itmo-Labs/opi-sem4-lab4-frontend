@@ -34,7 +34,7 @@ export const DefaultMain = () => {
 
                     dispatch({
                         type: 'points/updateFromWebSocket',
-                        payload: data.map((p: any) => ({
+                        payload: data.map((p) => ({
                             id: p.id,
                             x: p.x,
                             y: p.y,

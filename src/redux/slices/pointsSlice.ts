@@ -1,4 +1,4 @@
-import {createAsyncThunk, createSlice, type PayloadAction} from "@reduxjs/toolkit";
+import {createAction, createAsyncThunk, createSlice, type PayloadAction} from "@reduxjs/toolkit";
 
 export interface Point2DRow {
     id: number;
@@ -22,6 +22,9 @@ const initialState: PointsState = {
     loading: false,
     error: null,
 };
+
+export const addOptimisticPoint = createAction<Point2DRow>('points/addOptimisticPoint');
+export const removeOptimisticPoint = createAction<number>('points/removeOptimisticPoint'); // id
 
 export const fetchAllPoints = createAsyncThunk<Point2DRow[], string>(
     'points/fetchAll',
@@ -93,6 +96,12 @@ const pointsSlice = createSlice({
             state.data = action.payload;
             state.loading = false;
             state.error = null;
+        },
+        addOptimisticPoint: (state, action: PayloadAction<Point2DRow>) => {
+            state.data.unshift(action.payload);
+        },
+        removeOptimisticPoint: (state, action: PayloadAction<number>) => {
+            state.data = state.data.filter(p => p.id !== action.payload);
         },
     },
     extraReducers: (builder) => {

@@ -9,11 +9,23 @@ import 'primeicons/primeicons.css';
 
 import {ProtectedRoute} from "./components/routes/ProtectedRoute.tsx";
 import LoginPage from "./pages/LoginPage/LoginPage.tsx";
-import {Toaster} from "react-hot-toast";
+import toast, {Toaster, useToasterStore} from "react-hot-toast";
 import {MainPage} from "./pages/MainPage/MainPage.tsx";
 import {RegisterPage} from "./pages/RegisterPage/RegisterPage.tsx";
+import {useEffect} from "react";
 
 function App() {
+
+    const { toasts } = useToasterStore();
+
+    const TOAST_LIMIT = 3
+
+    useEffect(() => {
+        toasts
+            .filter((t) => t.visible) // Only consider visible toasts
+            .filter((_, i) => i >= TOAST_LIMIT) // Is toast index over limit?
+            .forEach((t) => toast.dismiss(t.id)); // Dismiss – Use toast.remove(t.id) for no exit animation
+    }, [toasts]);
 
     return (
     <>

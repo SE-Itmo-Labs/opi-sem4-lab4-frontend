@@ -4,7 +4,12 @@ import type {AppDispatch, RootState} from "../../../redux/store.ts";
 import classes from "./SnCoordinatesCanvases.module.scss";
 import {Dropdown} from "primereact/dropdown";
 import {useEffect, useState} from "react";
-import {fetchAllPoints} from "../../../redux/slices/pointsSlice.ts";
+import {
+    fetchAllPoints,
+    type Point2DRow,
+    addOptimisticPoint,
+    deleteAllMyPoints
+} from "../../../redux/slices/pointsSlice.ts";
 
 import stars from "../../../assets/images/skins/stars.png";
 import russia from "../../../assets/images/skins/russia.jpg";
@@ -12,6 +17,7 @@ import nostalgia from "../../../assets/images/skins/nostalgia.jpeg";
 import null_ from "../../../assets/images/skins/null.png";
 import {logout} from "../../../redux/slices/authSlice.ts";
 import toast from "react-hot-toast";
+import {Button} from "primereact/button";
 
 
 const SKINS = [
@@ -44,6 +50,9 @@ export const SnCoordinatesCanvases = () => {
 
     const [selectedSkin, setSelectedSkin] = useState<string>(null_);
 
+
+    const [tempIdCounter, setTempIdCounter] = useState(-2281337);
+
     const dispatch = useDispatch<AppDispatch>()
 
     const { token } = useSelector((state: RootState) => state.auth);
@@ -54,19 +63,54 @@ export const SnCoordinatesCanvases = () => {
 
     useEffect(() => {
         if (token) dispatch(fetchAllPoints(token));
+        else {
+            toast.error("Вы не авторизованы!");
+        }
     }, [dispatch, token]);
+
+    const handleDeleteAllPointsClick = async () => {
+        if (!token) {
+            toast.error("Вы не авторизованы!");
+        }
+
+        try {
+            await dispatch(deleteAllMyPoints(token!)).unwrap();
+            toast.success("Да запросто! :)");
+
+            dispatch(fetchAllPoints(token!));
+        } catch (err) {
+            console.error(err);
+            toast.error("Не удалось удалить точки");
+        }
+    };
 
     const handleCanvasClick = async (point: { x: number; y: number; r: number }) => {
         if (!token) {
-            toast.error("Вы не авторизованы!");
+            toast.error("Вы не авторизованы");
             return;
         }
 
         const { x, y, r } = point;
+
         if (y < -3 || y > 5) {
             toast.error("Y должен быть от -3 до 5");
             return;
         }
+
+        const optimisticPoint: Point2DRow = {
+            id: tempIdCounter,
+            x: parseFloat(x.toFixed(3)),
+            y: parseFloat(y.toFixed(3)),
+            R: r,
+            inArea: false,
+            executionTime: 0,
+            timestamp: new Date().toISOString(),
+            username: "unknown",
+        };
+
+        setTempIdCounter(tempIdCounter-1);
+
+        dispatch(addOptimisticPoint(optimisticPoint));
 
         try {
             const response = await fetch('https://itmo.ssngn.ru/lab4/api/point/save/', {
@@ -105,7 +149,7 @@ export const SnCoordinatesCanvases = () => {
     return (
         <>
             <div className={classes.canvases + " row"}>
-                <div className={"col-lg-9"}>
+                <div className={"col-xl-8"}>
 
                     {radii.map(r => {
                         const filtered = allPoints.filter(p => p.R === r);
@@ -119,6 +163,7 @@ export const SnCoordinatesCanvases = () => {
                                         x: p.x,
                                         y: p.y,
                                         hit: p.inArea,
+                                        user_id: p.id
                                     }))}
                                     onPointClick={(point) => handleCanvasClick({ ...point, r })}
                                 />
@@ -126,7 +171,7 @@ export const SnCoordinatesCanvases = () => {
                         );
                     })}
                 </div>
-                <div className={"col-lg-3"}>
+                <div className={"col-xl-4"}>
                     <h3><b>Скины:</b></h3>
                     <Dropdown
                         value={selectedSkin}
@@ -135,6 +180,9 @@ export const SnCoordinatesCanvases = () => {
                         optionLabel="label"
                         placeholder="Выберите скин"
                     />
+                    <br />
+                    <h4 className={"mt-5"}><b>Действия</b></h4>
+                    <Button onClick={handleDeleteAllPointsClick} severity={"success"}>Удалить все точки</Button>
                 </div>
             </div>
         </>

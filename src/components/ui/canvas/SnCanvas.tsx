@@ -13,6 +13,7 @@ export interface SnPoint {
     x: number;
     y: number;
     hit: boolean;
+    user_id: number;
 }
 
 export interface SnCanvasProps {
@@ -57,7 +58,7 @@ export const SnCanvas: React.FC<SnCanvasProps> = ({
 
         // const hit = isInArea(logicalX, logicalY, r);
         const hit = false;
-        const point: SnPoint = { x: logicalX, y: logicalY, hit };
+        const point: SnPoint = { x: logicalX, y: logicalY, hit: hit, user_id: 0};
 
         if (onPointClick) {
             onPointClick(point);
@@ -188,15 +189,26 @@ export const SnCanvas: React.FC<SnCanvasProps> = ({
 
     // === Точки ===
     const renderPoints = () =>
-        points.map((p, i) => (
+
+
+
+        points.map((p, i) => {
+
+            let fill = p.hit ? 'green' : 'red';
+
+            if (p.user_id <= 0) {
+                fill = "purple";
+            }
+
+            return (
             <Circle
                 key={i}
                 x={centerX + toPixel(p.x)}
                 y={centerY - toPixel(p.y)}
                 radius={5}
-                fill={p.hit ? 'green' : 'red'}
+                fill={fill}
             />
-        ));
+        )});
 
     return (
         <div style={{ display: 'inline-block', margin: '0 auto' }}>

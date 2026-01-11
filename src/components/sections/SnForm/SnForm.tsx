@@ -8,15 +8,19 @@ import {useDispatch, useSelector} from "react-redux";
 import {setR, setX, setY} from "../../../redux/slices/formSlice.ts";
 import {logout} from "../../../redux/slices/authSlice.ts";
 import toast from "react-hot-toast";
+import {addOptimisticPoint, fetchAllPoints, type Point2DRow} from "../../../redux/slices/pointsSlice.ts";
+import {useState} from "react";
 
 export const SnForm = () => {
     const dispatch = useDispatch();
-    const { token } = useSelector((state: RootState) => state.auth);
+    const token = useSelector((state: RootState) => state.auth.token);
     const data = {
         x: useSelector((state: RootState) => state.form.x),
         y: useSelector((state: RootState) => state.form.y),
         r: useSelector((state: RootState) => state.form.r),
     };
+
+    const [tempIdCounter, setTempIdCounter] = useState(-2281337);
 
     const rValues = ["0.5", "1", "1.5", "2"];
 
@@ -48,6 +52,21 @@ export const SnForm = () => {
             return;
         }
 
+        const optimisticPoint: Point2DRow = {
+            id: tempIdCounter,
+            x: parseFloat(x.toFixed(3)),
+            y: parseFloat(y.toFixed(3)),
+            R: r,
+            inArea: false,
+            executionTime: 0,
+            timestamp: new Date().toISOString(),
+            username: "unknown",
+        };
+
+        setTempIdCounter(tempIdCounter-1);
+
+        dispatch(addOptimisticPoint(optimisticPoint));
+
         try {
             const response = await fetch('https://itmo.ssngn.ru/lab4/api/point/save/', {
                 method: 'POST',
@@ -76,6 +95,9 @@ export const SnForm = () => {
             }
 
             toast.success("Точка отправлена!");
+
+            // @ts-ignore
+            dispatch(fetchAllPoints(token!));
         } catch (err) {
             console.error(err);
             toast.error("Не удалось отправить точку");
