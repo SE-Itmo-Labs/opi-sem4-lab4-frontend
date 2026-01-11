@@ -11,6 +11,7 @@ import {ProtectedRoute} from "./components/routes/ProtectedRoute.tsx";
 import LoginPage from "./pages/LoginPage/LoginPage.tsx";
 import {Toaster} from "react-hot-toast";
 import {MainPage} from "./pages/MainPage/MainPage.tsx";
+import {RegisterPage} from "./pages/RegisterPage/RegisterPage.tsx";
 
 function App() {
 
@@ -23,6 +24,7 @@ function App() {
             <PrimeReactProvider>
                 <Routes>
                     <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
                     <Route element={<ProtectedRoute />}>
                         <Route path={"/"} element={<MainPage />} />
                     </Route>
