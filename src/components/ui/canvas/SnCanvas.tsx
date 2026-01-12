@@ -1,6 +1,7 @@
 import type {KonvaEventObject} from "konva/lib/Node";
 import {Image as KonvaImage, Arc, Circle, Group, Layer, Line, Rect, Stage, Text} from "react-konva";
 import React, {useEffect, useState} from "react";
+import {createPortal} from "react-dom";
 
 const CANVAS_SIZE = 600;
 const GRID_UNITS = 3;    // -3 to 3
@@ -14,6 +15,7 @@ export interface SnPoint {
     y: number;
     hit: boolean;
     user_id: number;
+    username?: string;
 }
 
 export interface SnCanvasProps {
@@ -21,15 +23,38 @@ export interface SnCanvasProps {
     points?: SnPoint[];
     onPointClick?: (point: SnPoint) => void;
     backgroundImage?: string;
+    currentUsername?: string;
+    onDeletePoint?: (id: number) => void;
+    onDeleteAllPoints?: () => void;
 }
 
 export const SnCanvas: React.FC<SnCanvasProps> = ({
     r,
     points = [],
     onPointClick,
-    backgroundImage}) => {
+    backgroundImage,
+    currentUsername,
+    onDeletePoint,
+    onDeleteAllPoints}) => {
 
     const [image, setImage] = useState<HTMLImageElement | null>(null);
+
+    const [contextMenu, setContextMenu] = useState<{
+        x: number;
+        y: number;
+        point?: SnPoint;
+    } | null>(null);
+
+    const menuItemStyle: React.CSSProperties = {
+        display: 'block',
+        width: '100%',
+        padding: '6px 12px',
+        textAlign: 'left',
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        fontSize: '14px',
+    };
 
     useEffect(() => {
         if (!backgroundImage) {
@@ -40,10 +65,42 @@ export const SnCanvas: React.FC<SnCanvasProps> = ({
         img.src = backgroundImage;
         img.onload = () => setImage(img);
         img.onerror = () => console.error("Failed to load background:", backgroundImage);
+
+        const handleClickOutside = () => setContextMenu(null);
+        window.addEventListener('click', handleClickOutside);
+        return () => window.removeEventListener('click', handleClickOutside);
     }, [backgroundImage]);
 
     const centerX = CANVAS_SIZE / 2;
     const centerY = CANVAS_SIZE / 2;
+
+
+    const handleContextMenu = (e: KonvaEventObject<MouseEvent>) => {
+        e.evt.preventDefault();
+
+        const stage = e.target.getStage();
+        if (!stage) return;
+
+        const pos = stage.getPointerPosition();
+        if (!pos) return;
+
+        let clickedPoint: SnPoint | undefined;
+        for (const p of points) {
+            const dx = (centerX + toPixel(p.x)) - pos.x;
+            const dy = (centerY - toPixel(p.y)) - pos.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist <= 3.5 * 2) {
+                clickedPoint = p;
+                break;
+            }
+        }
+
+        setContextMenu({
+            x: e.evt.clientX,
+            y: e.evt.clientY,
+            point: clickedPoint,
+        });
+    };
 
 
     const handleClick = (e: KonvaEventObject<MouseEvent>) => {
@@ -215,7 +272,12 @@ export const SnCanvas: React.FC<SnCanvasProps> = ({
 
     return (
         <div style={{ display: 'inline-block', margin: '0 auto' }}>
-            <Stage width={CANVAS_SIZE} height={CANVAS_SIZE} onClick={handleClick}>
+            <Stage
+                width={CANVAS_SIZE}
+                height={CANVAS_SIZE}
+                onClick={handleClick}
+                onContextMenu={handleContextMenu}
+            >
                 <Layer>
                     {/* Фоновое изображение */}
                     {image && (
@@ -233,6 +295,72 @@ export const SnCanvas: React.FC<SnCanvasProps> = ({
                     {renderPoints()}
                 </Layer>
             </Stage>
+
+
+            {contextMenu && createPortal(
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: contextMenu.y,
+                        left: contextMenu.x,
+                        backgroundColor: 'white',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                        zIndex: 1000,
+                        padding: '4px 0',
+                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setContextMenu(null);
+                    }}
+                >
+                    {contextMenu.point ? (
+                        <>
+                            <div style={{ padding: '4px 12px', fontSize: '12px', color: '#666' }}>
+                                Точка: ({contextMenu.point.x}, {contextMenu.point.y})<br />
+                                Пользователь: {contextMenu.point.username}
+                            </div>
+                            <hr style={{ margin: '4px 0' }} />
+                            {contextMenu.point.username === currentUsername && (
+                                <button
+                                    style={menuItemStyle}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDeletePoint!(contextMenu.point!.user_id);
+                                        setContextMenu(null);
+                                    }}
+                                >
+                                    Удалить точку
+                                </button>
+                            )}
+                            <button
+                                style={menuItemStyle}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDeleteAllPoints!();
+                                    setContextMenu(null);
+                                }}
+                            >
+                                Удалить все точки
+                            </button>
+                        </>
+                    ) : (
+                        <button
+                            style={menuItemStyle}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteAllPoints!();
+                                setContextMenu(null);
+                            }}
+                        >
+                            Удалить все точки
+                        </button>
+                    )}
+                </div>,
+                document.body
+            )}
         </div>
     );
 }

@@ -8,7 +8,7 @@ import {
     fetchAllPoints,
     type Point2DRow,
     addOptimisticPoint,
-    deleteAllMyPoints
+    deleteAllMyPoints, deletePoint
 } from "../../../redux/slices/pointsSlice.ts";
 
 import stars from "../../../assets/images/skins/stars.png";
@@ -27,25 +27,6 @@ const SKINS = [
     {label: "Ничего", value: null_}
 ];
 
-// const fetchPoints = async (token: string): Promise<SnPoint[]> => {
-//     const res = await fetch('https://itmo.ssngn.ru/lab4/api/point/all', {
-//         method: "GET",
-//         headers: {
-//             'snAuthToken': token,
-//         },
-//     });
-//     if (!res.ok) throw new Error('Failed to fetch points');
-//
-//     const json = await res.json();
-//     console.log("ALL DATA", json)
-//
-//     return json.data.map((p: any) => ({
-//         x: p.x,
-//         y: p.y,
-//         hit: p.inArea,
-//     }));
-// };
-
 export const SnCoordinatesCanvases = () => {
 
     const [selectedSkin, setSelectedSkin] = useState<string>(null_);
@@ -58,6 +39,7 @@ export const SnCoordinatesCanvases = () => {
     const { token } = useSelector((state: RootState) => state.auth);
     const currentRadius = useSelector((state: RootState) => state.form.r);
     const allPoints = useSelector((state: RootState) => state.points.data);
+    const myUsername = useSelector((state: RootState) => state.auth.username);
 
     const radii = [0.5, 1, 1.5, 2];
 
@@ -164,9 +146,18 @@ export const SnCoordinatesCanvases = () => {
                                         x: p.x,
                                         y: p.y,
                                         hit: p.inArea,
-                                        user_id: p.id
+                                        user_id: p.id,
+                                        username: p.username,
                                     }))}
+                                    currentUsername={myUsername}
                                     onPointClick={(point) => handleCanvasClick({ ...point, r })}
+                                    onDeletePoint={(id) => {
+                                        dispatch(deletePoint({ id, token: token! })).unwrap().then(() => {
+                                            toast.success("Точка удалена");
+                                            dispatch(fetchAllPoints(token!));
+                                        }).catch(() => toast.error("Ошибка удаления"));
+                                    }}
+                                    onDeleteAllPoints={handleDeleteAllPointsClick}
                                 />
                             </div>
                         );
