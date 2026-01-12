@@ -44,10 +44,10 @@ export const SnCoordinatesCanvases = () => {
     const radii = [0.5, 1, 1.5, 2];
 
     useEffect(() => {
-        if (token) dispatch(fetchAllPoints(token));
-        else {
-            toast.error("Вы не авторизованы!");
-        }
+        // if (token) dispatch(fetchAllPoints(token));
+        // else {
+        //     toast.error("Вы не авторизованы!");
+        // }
     }, [dispatch, token]);
 
     const handleDeleteAllPointsClick = async () => {

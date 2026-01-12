@@ -22,38 +22,61 @@ export const DefaultMain = () => {
     const connectWebSocket = useCallback(() => {
         if (!token || wsRef.current?.readyState === WebSocket.OPEN) return;
 
-        const wsUrl = `wss://itmo.ssngn.ru/lab4/ws/points/${token}`;
+        if (wsRef.current) {
+            wsRef.current.close();
+        }
+
+        const wsUrl = `wss://itmo.ssngn.ru/lab4/ws/points/${encodeURIComponent(token)}`;
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
 
+        ws.onopen = () => {
+            console.log("WEBSOCKET ВКЛЮЧЕН УРАААААА");
+        };
+
         ws.onmessage = (event) => {
             try {
-                const data = JSON.parse(event.data);
-                // [{id, x, y, R, inArea, timestamp, executionTime, username}]
-                if (Array.isArray(data)) {
-
-                    dispatch({
-                        type: 'points/updateFromWebSocket',
-                        payload: data.map((p) => ({
-                            id: p.id,
-                            x: p.x,
-                            y: p.y,
-                            R: p.R,
-                            inArea: p.inArea,
-                            executionTime: p.executionTime,
-                            timestamp: p.timestamp,
-                            username: p.username,
-                        })),
-                    });
-                }
+                const point = JSON.parse(event.data); // одна точка!
+                dispatch({
+                    type: 'points/addOptimisticPoint',
+                    payload: {
+                        id: point.id,
+                        x: point.x,
+                        y: point.y,
+                        R: point.R,
+                        inArea: point.inArea,
+                        executionTime: point.executionTime,
+                        timestamp: point.timestamp,
+                        username: point.username,
+                    },
+                });
             } catch (err) {
-                console.error("Ошибка обработки WebSocket-сообщения:", err);
+                console.error("WEBSOCKET ERR", err);
             }
         };
 
-        ws.onopen = () => console.log("WebSocket подключен");
-        ws.onerror = (err) => console.error("WebSocket ошибка:", err);
-        ws.onclose = () => console.log("WebSocket закрыт");
+        ws.onerror = (err) => {
+            console.error("WEBSOCKET ERR", err);
+        };
+
+        let retryCount = 0;
+        const MAX_RETRY_DELAY = 30_000; // 30 sec
+
+        ws.onclose = (event) => {
+
+            console.log("🔌 WEBSOCKET CLOSED", event.code, event.reason);
+
+            const delay = Math.min(1000 * Math.pow(2, retryCount), MAX_RETRY_DELAY);
+            console.log("RETRY AFTER ${delay} MS");
+
+            setTimeout(() => {
+                if (token) {
+                    connectWebSocket();
+                    retryCount++;
+                }
+            }, delay);
+        };
+
     }, [token, dispatch]);
 
     useEffect(() => {

@@ -29,7 +29,11 @@ export const SnCoordsTable = () => {
                     if (!token) return;
                     try {
                         await dispatch(deletePoint({ id: rowData.id, token })).unwrap();
-                        dispatch(fetchAllPoints(token)); // или полагаться на WebSocket
+
+
+                        dispatch(fetchAllPoints(token));
+
+
                         toast.success("Точка удалена");
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     } catch (_:unknown) {
