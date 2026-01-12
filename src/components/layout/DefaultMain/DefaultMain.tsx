@@ -12,6 +12,7 @@ import {useDispatch, useSelector} from "react-redux";
 import type {RootState} from "../../../redux/store.ts";
 
 import type { AppDispatch } from "../../../redux/store.ts";
+import {fetchAllPoints} from "../../../redux/slices/pointsSlice.ts";
 
 export const DefaultMain = () => {
 
@@ -64,10 +65,10 @@ export const DefaultMain = () => {
 
         ws.onclose = (event) => {
 
-            console.log("🔌 WEBSOCKET CLOSED", event.code, event.reason);
+            console.log("WEBSOCKET CLOSED", event.code, event.reason);
 
             const delay = Math.min(1000 * Math.pow(2, retryCount), MAX_RETRY_DELAY);
-            console.log("RETRY AFTER ${delay} MS");
+            console.log(`RETRY AFTER ${delay} MS`);
 
             setTimeout(() => {
                 if (token) {
@@ -81,6 +82,7 @@ export const DefaultMain = () => {
 
     useEffect(() => {
         if (isAuthenticated && token) {
+            dispatch(fetchAllPoints(token));
             connectWebSocket();
         }
 
@@ -116,7 +118,11 @@ export const DefaultMain = () => {
                         <SnCoordsTable></SnCoordsTable>
                     </section>
 
-                    <section className={classes.section}>
+                    <section className={classes.section} style={
+                        {
+                            overflowY: "auto"
+                        }
+                    }>
                         <details open>
                             <summary>Показать задание</summary>
                             <Markdown>

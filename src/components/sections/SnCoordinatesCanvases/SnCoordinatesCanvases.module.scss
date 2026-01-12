@@ -1,6 +1,8 @@
 .canvases {
   //display: flex;
 
+  overflow-x: auto;
+
   >* {
     align: center;
   }
