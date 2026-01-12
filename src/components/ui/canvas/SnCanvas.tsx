@@ -114,7 +114,7 @@ export const SnCanvas: React.FC<SnCanvasProps> = ({
         if (!pos) return;
 
         const logicalX = toLogical(pos.x - centerX);
-        const logicalY = toLogical(centerY - pos.y); // инвертируем Y
+        const logicalY = toLogical(centerY - pos.y); // -Y
 
         // const hit = isInArea(logicalX, logicalY, r);
         const hit = false;
@@ -279,14 +279,13 @@ export const SnCanvas: React.FC<SnCanvasProps> = ({
                 onContextMenu={handleContextMenu}
             >
                 <Layer>
-                    {/* Фоновое изображение */}
                     {image && (
                         <KonvaImage
                             image={image}
                             width={CANVAS_SIZE}
                             height={CANVAS_SIZE}
                             opacity={0.3}
-                            listening={false} // чтобы не мешал кликам
+                            listening={false}
                         />
                     )}
 
