@@ -44,9 +44,9 @@ export const SnCoordsTable = () => {
         <>
             <DataTable value={points} paginator rows={5} rowsPerPageOptions={[5, 10, 25]}>
                 <Column field="id" header="ID" sortable />
-                <Column field="x" header="x" sortable />
-                <Column field="y" header="y" sortable />
-                <Column field="R" header="R" sortable />
+                <Column field="x" header="x" sortable body={(row:any) => {return parseFloat(row.x.toFixed(3))}} />
+                <Column field="y" header="y" sortable body={(row:any) => {return parseFloat(row.y.toFixed(3))}} />
+                <Column field="R" header="R" sortable  />
                 <Column
                     field="inArea"
                     header="Статус"
