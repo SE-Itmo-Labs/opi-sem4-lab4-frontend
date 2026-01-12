@@ -85,6 +85,7 @@ export const SnCoordinatesCanvases = () => {
     };
 
     const handleCanvasClick = async (point: { x: number; y: number; r: number }) => {
+
         if (!token) {
             toast.error("Вы не авторизованы");
             return;

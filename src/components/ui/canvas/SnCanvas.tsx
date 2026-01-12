@@ -47,6 +47,9 @@ export const SnCanvas: React.FC<SnCanvasProps> = ({
 
 
     const handleClick = (e: KonvaEventObject<MouseEvent>) => {
+
+        if (e.evt.button !== 0) return;
+
         const stage = e.target.getStage();
         if (!stage) return;
 
