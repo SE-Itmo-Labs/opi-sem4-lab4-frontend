@@ -39,6 +39,7 @@ export const SnCoordinatesCanvases = () => {
     const { token } = useSelector((state: RootState) => state.auth);
     const currentRadius = useSelector((state: RootState) => state.form.r);
     const allPoints = useSelector((state: RootState) => state.points.data);
+
     const myUsername = useSelector((state: RootState) => state.auth.username);
 
     const radii = [0.5, 1, 1.5, 2];

@@ -28,7 +28,7 @@ export interface SnCanvasProps {
     onDeleteAllPoints?: () => void;
 }
 
-export const SnCanvas: React.FC<SnCanvasProps> = ({
+export const SnCanvas: React.FC<SnCanvasProps> = React.memo(({
     r,
     points = [],
     onPointClick,
@@ -103,9 +103,9 @@ export const SnCanvas: React.FC<SnCanvasProps> = ({
     };
 
 
-    const handleClick = (e: KonvaEventObject<MouseEvent>) => {
+    const handleClick = (e: KonvaEventObject<MouseEvent|TouchEvent>) => {
 
-        if (e.evt.button !== 0) return;
+        if ('button' in e.evt && e.evt.button !== 0) return;
 
         const stage = e.target.getStage();
         if (!stage) return;
@@ -250,8 +250,6 @@ export const SnCanvas: React.FC<SnCanvasProps> = ({
     // === Точки ===
     const renderPoints = () =>
 
-
-
         points.map((p, i) => {
 
             let fill = p.hit ? 'green' : 'red';
@@ -276,6 +274,13 @@ export const SnCanvas: React.FC<SnCanvasProps> = ({
                 width={CANVAS_SIZE}
                 height={CANVAS_SIZE}
                 onClick={handleClick}
+
+                onTap={handleClick}
+
+                onTouchStart={(e) => {
+                    e.evt.preventDefault();
+                }}
+
                 onContextMenu={handleContextMenu}
             >
                 <Layer>
@@ -362,4 +367,4 @@ export const SnCanvas: React.FC<SnCanvasProps> = ({
             )}
         </div>
     );
-}
+});
