@@ -16,7 +16,7 @@ export default defineConfig({
       }
     }
   ],
-  base: '/web-sem3-lab4-frontend/',
+  base: '/opi-sem4-lab3-frontend/',
   css: {
     preprocessorOptions: {
       scss: {

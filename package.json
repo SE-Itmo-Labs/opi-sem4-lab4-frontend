@@ -8,7 +8,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "dev": "python project_structure.py && vite",
-    "build": "tsc -b && vite build && gh-pages -d dist",
+    "build": "npm install && npx tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
